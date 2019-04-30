@@ -166,7 +166,7 @@ class Optimizer(metaclass=ABCMeta):
                 
 				save_sample_images(sample_dir, i, sample_image, sample_H, sample_W)
                                 
-				eval_score = self.evaluator.score(sess. fid, self.model, **kwargs)
+				eval_score = self.evaluator.score(sess, fid, self.model, **kwargs)
 				eval_scores.append(eval_score)
 
 				if verbose:

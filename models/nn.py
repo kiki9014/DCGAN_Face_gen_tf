@@ -49,14 +49,6 @@ class GAN(metaclass=ABCMeta):
         """
         pass
     
-#     @abstractmethod
-#     def _build_sampler(self, **kwargs):
-#         """
-#         Build Sample generator.
-#         Architecture is same with generator, Only difference is reusability.
-#         This should be implemented.
-#         """
-#         pass
     
     @abstractmethod
     def _build_loss(self, **kwargs):
