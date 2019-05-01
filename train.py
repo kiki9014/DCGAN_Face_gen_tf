@@ -18,7 +18,7 @@ trainval_dir = os.path.join(root_dir, 'thumbnails128x128')
 IM_SIZE = (64, 64)
 
 # Load trainval set and split into train/val sets
-X_trainval = dataset.read_data(trainval_dir, IM_SIZE, 108)
+X_trainval = dataset.read_data(trainval_dir, IM_SIZE, 96)
 trainval_size = X_trainval.shape[0]
 train_set = dataset.Dataset(X_trainval)
 print(train_set.num_examples)
@@ -26,11 +26,11 @@ print(train_set.num_examples)
 """ 2. Set training hyperparameters"""
 hp_d = dict()
 
-save_dir = './DCGAN_training_FFHQ_z_90_linear_02/'
+save_dir = './DCGAN_training_FFHQ_z_100_96crop_05_dense/'
 
 # FIXME: Training hyperparameters
 hp_d['batch_size'] = 64
-hp_d['num_epochs'] = 45
+hp_d['num_epochs'] = 100
 hp_d['init_learning_rate'] = 2e-4
 hp_d['momentum'] = 0.5
 hp_d['learning_rate_patience'] = 10
@@ -44,8 +44,8 @@ hp_d['sample_H'] = 20
 hp_d['sample_W'] = 16
 hp_d['sample_dir'] = save_dir
 hp_d['batch_size_eval'] = 50
-hp_d['z_dim'] = 90
-hp_d['G_FC_layer_channel'] = 1024
+hp_d['z_dim'] = 100
+hp_d['G_FC_layer_channel'] = 512
 hp_d['G_channel'] = 64
 hp_d['D_channel'] = 64
 
@@ -54,7 +54,7 @@ hp_d['D_channel'] = 64
 graph = tf.get_default_graph()
 config = tf.ConfigProto()
 config.gpu_options.allow_growth = True
-config.gpu_options.visible_device_list = '1'
+config.gpu_options.visible_device_list = '3'
 model = GAN([IM_SIZE[0], IM_SIZE[1], 3], **hp_d)
 
 evaluator = Evaluator()

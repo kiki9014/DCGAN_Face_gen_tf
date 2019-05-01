@@ -1,6 +1,31 @@
 import tensorflow as tf
 import numpy as np
 
+def weight_variable(shape, stddev=0.01):
+    """
+    새로운 가중치 변수를 주어진 shape에 맞게 선언하고,
+    Normal(0.0, stddev^2)의 정규분포로부터의 샘플링을 통해 초기화함.
+    :param shape: list(int).
+    :param stddev: float, 샘플링 대상이 되는 정규분포의 표준편차 값.
+    :return weights: tf.Variable.
+    """
+    weights = tf.get_variable('weights', shape, tf.float32,
+                              tf.random_normal_initializer(mean=0.0, stddev=stddev))
+    return weights
+
+
+def bias_variable(shape, value=1.0):
+    """
+    새로운 바이어스 변수를 주어진 shape에 맞게 선언하고, 
+    주어진 상수값으로 추기화함.
+    :param shape: list(int).
+    :param value: float, 바이어스의 초기화 값.
+    :return biases: tf.Variable.
+    """
+    biases = tf.get_variable('biases', shape, tf.float32,
+                             tf.constant_initializer(value=value))
+    return biases
+
 def conv_layer(x, filters, kernel_size, strides, padding='SAME', use_bias=True):
     return tf.layers.conv2d(x, filters, kernel_size, strides, padding, use_bias=use_bias, kernel_initializer=tf.initializers.random_normal(0.0, 0.02))
 
@@ -54,7 +79,13 @@ def fc_layer(x, out_dim, **kwargs):
     :param out_dim: int, the dimension of output vector.
     :return: tf.Tensor.
     """
-    return linear(x, out_dim, 'linear', with_w=True)#tf.layers.dense(x, out_dim)
+    weights_stddev = kwargs.pop('weights_stddev', 0.02)
+    biases_value = kwargs.pop('biases_value', 0.0)
+    in_dim = int(x.get_shape()[-1])
+
+    weights = weight_variable([in_dim, out_dim], stddev=weights_stddev)
+    biases = bias_variable([out_dim], value=biases_value)
+    return tf.matmul(x, weights) + biases
 
 
 def fc_bn_lrelu(x, out_dim, is_train, alpha=0.2):
@@ -65,19 +96,3 @@ def fc_bn_lrelu(x, out_dim, is_train, alpha=0.2):
     fc = fc_layer(x, out_dim)
     bn = batchNormalization(fc, is_train)
     return tf.nn.leaky_relu(bn, alpha)
-
-def linear(input_, output_size, scope=None, stddev=0.02, bias_start=0.0, with_w=False):
-    shape = input_.get_shape().as_list()
-
-    with tf.variable_scope(scope or "Linear"):
-        try:
-            matrix = tf.get_variable("Matrix", [shape[1], output_size], tf.float32, tf.random_normal_initializer(stddev=stddev))
-        except ValueError as err:
-            msg = "NOTE: Usually, this is due to an issue with the image dimensions.  Did you correctly set '--crop' or '--input_height' or '--output_height'?"
-            err.args = err.args + (msg,)
-            raise
-        bias = tf.get_variable("bias", [output_size], initializer=tf.constant_initializer(bias_start))
-        if with_w:
-            return tf.matmul(input_, matrix) + bias#, matrix, bias
-        else:
-            return tf.matmul(input_, matrix) + bias

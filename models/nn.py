@@ -98,7 +98,7 @@ class GAN(metaclass=ABCMeta):
             z_batch = z[start_batch:end_batch]
             
             image_gen = sess.run(self.G_, feed_dict={
-                                self.z : z_batch, self.is_train: False})
+                                self.z : z_batch})
             _image_gen.append(image_gen)
             
         if verbose:
@@ -151,11 +151,11 @@ class DCGAN(GAN):
             z_input = self.z
             
             d['layer_1'] = fc_layer(z_input, 4*4*fc_channel)
-            d['reshape'] = tf.nn.relu(batchNormalization(tf.reshape(d['layer_1'], [-1, 4, 4, fc_channel]), self.is_train))
-            d['layer_2'] = deconv_bn_relu(d['reshape'], G_channel*4, kernel_size, self.is_train, strides=(2,2))
-            d['layer_3'] = deconv_bn_relu(d['layer_2'], G_channel*2, kernel_size, self.is_train, strides=(2,2))
-            d['layer_4'] = deconv_bn_relu(d['layer_3'], G_channel, kernel_size, self.is_train, strides=(2,2))
-            d['layer_5'] = deconv_bn_relu(d['layer_4'], c_dim, kernel_size, self.is_train, strides=(2,2), bn=False, relu=False)
+            d['reshape'] = tf.nn.relu(batchNormalization(tf.reshape(d['layer_1'], [-1, 4, 4, fc_channel]), False))
+            d['layer_2'] = deconv_bn_relu(d['reshape'], G_channel*4, kernel_size, False, strides=(2,2))
+            d['layer_3'] = deconv_bn_relu(d['layer_2'], G_channel*2, kernel_size, False, strides=(2,2))
+            d['layer_4'] = deconv_bn_relu(d['layer_3'], G_channel, kernel_size, False, strides=(2,2))
+            d['layer_5'] = deconv_bn_relu(d['layer_4'], c_dim, kernel_size, False, strides=(2,2), bn=False, relu=False)
             d['tanh'] = tf.nn.tanh(d['layer_5'])
             
         return d['tanh']

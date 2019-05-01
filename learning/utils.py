@@ -57,3 +57,11 @@ def save_sample_images(save_dir, step, sample_images, H, W):
     
     file_name = 'sample_image_{}'.format(step) + '.jpg'
     cv2.imwrite(os.path.join(save_dir, file_name), grid_image[:,:,::-1])
+    
+    
+def interpolate(v1, v2, W):
+    diff = v2-v1
+    intp = np.tile(v1, (W+2,1))
+    for i in range(W+2):
+        intp[i,:] += np.squeeze(diff/(W+1) * i)
+    return intp

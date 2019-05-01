@@ -48,21 +48,8 @@ class Optimizer(metaclass=ABCMeta):
 		self.curr_learning_rate = self.init_learning_rate
     
 	def z_sample(self, H, W, z_dim):
-		z = []
-		option=2
-
-		if option == 1:
-			for i in range(H):
-				single_z = np.random.uniform(-1.0, 1.0, size=(1, z_dim))
-				z_W = np.tile(single_z, (W, 1))
-				for j in range(W):
-					idx_to_change = i # fix if you want to change spectrum index
-					z_W[j, idx_to_change] = 1./W * j
-				z.append(z_W)
-			return np.concatenate(z, axis=0)
-		elif option == 2:
-			z = np.random.uniform(-1.0, 1.0, size=(W*H, z_dim))
-			return z
+		z = np.random.uniform(-1.0, 1.0, size=(W*H, z_dim))
+		return z
 
 
 	@abstractmethod
@@ -93,18 +80,22 @@ class Optimizer(metaclass=ABCMeta):
 
 		# Sample a single batch
 		X = self.train_set.next_batch(self.batch_size, shuffle=True)
-		z = np.random.uniform(-1.0, 1.0, size=(self.batch_size, self.model.z_dim)).astype(np.float32)
+		z = np.random.uniform(-1.0, 1.0, size=(self.batch_size, self.model.z_dim)) \
+		.astype(np.float32)
 		# Compute the loss and make update
         # Generator will be updated twice
 		_, D_loss, D = \
 			sess.run([self.optimize_D, self.model.discr_loss, self.model.D_l4],
-				feed_dict={self.model.z: z, self.model.X: X, self.model.is_train: True, self.learning_rate_placeholder: self.curr_learning_rate})
+				feed_dict={self.model.z: z, self.model.X: X, self.model.is_train: True, 
+							self.learning_rate_placeholder: self.curr_learning_rate})
 		_, G_loss, G = \
 			sess.run([self.optimize_G, self.model.gen_loss, self.model.G],
-				feed_dict={self.model.z: z, self.model.X: X, self.model.is_train: True, self.learning_rate_placeholder: self.curr_learning_rate})
+				feed_dict={self.model.z: z, self.model.X: X, self.model.is_train: True, 
+							self.learning_rate_placeholder: self.curr_learning_rate})
 		_, G_loss, G = \
 			sess.run([self.optimize_G, self.model.gen_loss, self.model.G],
-				feed_dict={self.model.z: z, self.model.X: X, self.model.is_train: True, self.learning_rate_placeholder: self.curr_learning_rate})
+				feed_dict={self.model.z: z, self.model.X: X, self.model.is_train: True, 
+							self.learning_rate_placeholder: self.curr_learning_rate})
 		return G_loss, D_loss, X, G, D
     
 	def train(self, sess, save_dir='/tmp', details=False, verbose=True, **kwargs):
@@ -121,7 +112,8 @@ class Optimizer(metaclass=ABCMeta):
 		saver = tf.train.Saver()
 		sess.run(tf.global_variables_initializer())	# initialize all weights
         
-		inception_path = kwargs.pop('inception_path', './inception/inception-2015-12-05/classify_image_graph_def.pb')
+		inception_path = kwargs.pop('inception_path', 
+                                    './inception/inception-2015-12-05/classify_image_graph_def.pb')
 		dataset_stats_path = kwargs.pop('dataset_stats_path', './data/thumbnails128x128/stats.pkl')
 		fid = FID(inception_path, dataset_stats_path, sess)
 

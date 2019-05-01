@@ -25,9 +25,9 @@ def read_data(data_dir, image_size, crop_size=None):
             im = resize(im, (image_size[1], image_size[0]))
         if len(im.shape) == 2:
             im = np.expand_dims(im, 2)
-            im = np.concatenate([im, im, im], -1)
+        else:
+            im = im[:,:,::-1]
         im = im/127.5 - 1
-        im = im[:,:,::-1]
         images.append(im)
         
     X_set = np.array(images, dtype=np.float32)
