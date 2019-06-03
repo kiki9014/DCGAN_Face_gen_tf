@@ -1,6 +1,6 @@
 # DCGAN-FID-Face-generation
 
-Code repository for blog article (http://research.sualab.com/introduction/practice/2019/05/08/generative-adversarial-network.html)
+Code repository for [blog article](http://research.sualab.com/introduction/practice/2019/05/08/generative-adversarial-network.html)
 
 ## Generated random images
 
